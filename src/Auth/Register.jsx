@@ -1,5 +1,4 @@
-
-import { Alert, Button, Card, Form, Input, Row, Spin, Typography } from "antd";
+import { Alert, Button, Card, Form, Input, Row, Spin, Typography, Progress } from "antd";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -7,13 +6,14 @@ import avatar from "../assets/images/worker-img01.png";
 import signupImg from "../assets/images/signup.gif";
 import { BASE_URL } from "../config";
 import uploadImageToCloudinary from "../utils/uploadCloudinary";
-import ReCAPTCHA from "react-google-recaptcha"; // Import reCAPTCHA component
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Register = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewURL, setPreviewURL] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [passwordStrength, setPasswordStrength] = useState(0); // For password strength
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,9 +22,9 @@ const Register = () => {
     role: "patient",
     gender: "",
     photo: "",
-    captcha: "", // Add a field for the captcha token
+    captcha: "",
   });
-  const [captchaValid, setCaptchaValid] = useState(false); // To track if captcha is valid
+  const [captchaValid, setCaptchaValid] = useState(false);
 
   const navigate = useNavigate();
 
@@ -46,11 +46,25 @@ const Register = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+
+    if (name === "password") {
+      calculatePasswordStrength(value);
+    }
   };
 
   const handleCaptchaChange = (value) => {
     setFormData({ ...formData, captcha: value });
-    setCaptchaValid(!!value); // Validate if the captcha token is filled
+    setCaptchaValid(!!value);
+  };
+
+  const calculatePasswordStrength = (password) => {
+    let strength = 0;
+    if (password.length >= 8) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password)) strength += 1;
+    if (/[@$!%*?&]/.test(password)) strength += 1;
+    setPasswordStrength((strength / 5) * 100);
   };
 
   const handleRegister = async () => {
@@ -157,6 +171,18 @@ const Register = () => {
                       onChange={handleChange}
                     />
                   </Form.Item>
+                  <Progress
+                    percent={passwordStrength}
+                    showInfo
+                    status={
+                      passwordStrength < 50
+                        ? "exception"
+                        : passwordStrength < 80
+                        ? "normal"
+                        : "success"
+                    }
+                    className="mb-3"
+                  />
                   <Form.Item
                     label="Confirm Password"
                     name="confirmPassword"
@@ -171,7 +197,9 @@ const Register = () => {
                           if (!value || getFieldValue("password") === value) {
                             return Promise.resolve();
                           }
-                          return Promise.reject("The two passwords do not match!");
+                          return Promise.reject(
+                            "The two passwords do not match!"
+                          );
                         },
                       }),
                     ]}
@@ -251,10 +279,9 @@ const Register = () => {
                       </div>
                     </div>
 
-                    {/* reCAPTCHA */}
                     <Form.Item>
                       <ReCAPTCHA
-                        sitekey="6Lc9FL0qAAAAACESI-gPez1IjqjlcvoymufCNeCM" // Replace with your site key
+                        sitekey="6Lc9FL0qAAAAACESI-gPez1IjqjlcvoymufCNeCM"
                         onChange={handleCaptchaChange}
                       />
                     </Form.Item>
