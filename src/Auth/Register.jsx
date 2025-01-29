@@ -57,6 +57,7 @@ const Register = () => {
     setCaptchaValid(!!value);
   };
 
+  // Strength calculation based on length, uppercase, lowercase, numeric, special character
   const calculatePasswordStrength = (password) => {
     let strength = 0;
     if (password.length >= 8) strength += 1;
@@ -161,6 +162,24 @@ const Register = () => {
                         required: true,
                         message: "Please input your password!",
                       },
+                      // Custom validator to prevent weak passwords
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          // If there's no password yet, require one
+                          if (!value) {
+                            return Promise.reject(
+                              "Please input your password!"
+                            );
+                          }
+                          // Example: disallow if password strength is below 60%
+                          if (passwordStrength < 60) {
+                            return Promise.reject(
+                              "Your password is too weak! Use at least 8 characters, including uppercase, lowercase, numbers, and special characters."
+                            );
+                          }
+                          return Promise.resolve();
+                        },
+                      }),
                     ]}
                   >
                     <Input.Password
