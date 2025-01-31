@@ -1,4 +1,4 @@
-
+import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import {
   Alert,
   Button,
@@ -10,6 +10,7 @@ import {
   Spin,
   Typography,
 } from "antd";
+import axios from "axios";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useNavigate } from "react-router-dom";
@@ -23,17 +24,113 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [captchaToken, setCaptchaToken] = useState(null);
+  const [otp, setOtp] = useState("");
+  const [isSentOtp, setIsSentOtp] = useState(false);
+  const [showOtp, setShowOtp] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [resetPassword, setResetPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [show, setShow] = useState(false);
+
+  // ---- NEW STATE FOR PASSWORD VISIBILITY ----
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false);
 
   // ---- NEW STATE FOR LOCKOUT/ATTEMPTS ----
   const [remainingAttempts, setRemainingAttempts] = useState(null);
   const [lockTime, setLockTime] = useState(null);
   const [timer, setTimer] = useState(null);
-
   // We'll store interval reference so we can clear it
   const timerRef = useRef(null);
 
+  const [passwordStrength, setPasswordStrength] = useState(0);
+
+  // State to track if passwords match
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
+
   const navigate = useNavigate();
   const { dispatch } = useContext(AuthContext);
+
+  const calculatePasswordStrength = (password) => {
+    let strength = 0;
+    if (password.length >= 8) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password)) strength += 1;
+    if (/[@$!%*?&]/.test(password)) strength += 1;
+    setPasswordStrength((strength / 5) * 100);
+  };
+
+  const handleReset = async (e) => {
+    e.preventDefault();
+
+    if (resetPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    // Check if password strength is strong before allowing reset
+    if (passwordStrength < 70) {
+      toast.error("Password is too weak! Please choose a stronger password.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${BASE_URL}/auth/reset_password`, {
+        phone: phone,
+        otp: otp,
+        password: resetPassword,
+      });
+
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        setShow(false);
+        setResetPassword("");
+        setConfirmPassword("");
+        setIsSentOtp(false);
+      }
+    } catch (error) {
+      if (error.response) {
+        if (error.response.status < 500) {
+          toast.error(error.response.message);
+        }
+        toast.error(error.response.message);
+      }
+    }
+  };
+
+  const sentOtp = async (e) => {
+    e.preventDefault();
+
+    // Validate phone number input
+    if (!phone.trim()) {
+      toast.error("Please enter your phone number");
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${BASE_URL}/auth/forgot_password`, {
+        phone: phone.trim(), // Ensure no extra spaces in phone number
+      });
+
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        setIsSentOtp(true); // Disable button after OTP is sent
+      } else {
+        toast.error(response.data.message || "Failed to send OTP.");
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        // Handle known errors
+        toast.error(error.response.data.message || "Failed to send OTP.");
+      } else {
+        // Handle unexpected errors
+        console.log(error);
+        toast.error("An unexpected error occurred. Please try again.");
+      }
+    }
+  };
 
   // ---- NEW FUNCTION TO HANDLE COUNTDOWN ----
   const startCountdown = (lockDuration) => {
@@ -73,7 +170,7 @@ const Login = () => {
       toast.error("Please complete the CAPTCHA!");
       return;
     }
-  
+
     setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/auth/login`, {
@@ -84,7 +181,7 @@ const Login = () => {
         body: JSON.stringify(values),
       });
       const result = await res.json();
-  
+
       // Handle specific status codes
       if (res.status === 400) {
         setLoading(false);
@@ -110,16 +207,16 @@ const Login = () => {
         }
         return;
       }
-  
+
       // Check for other errors
       if (!res.ok) {
         throw new Error(result.message || "Login failed.");
       }
-  
+
       // Store session data in sessionStorage
       sessionStorage.setItem("token", result.token); // Store JWT token
       sessionStorage.setItem("user", JSON.stringify(result.data)); // Store user details
-  
+
       // Dispatch to context for global state management
       dispatch({
         type: "LOGIN_SUCCESS",
@@ -129,7 +226,7 @@ const Login = () => {
           token: result.token,
         },
       });
-  
+
       toast.success(result.message || "Login successful!");
       navigate("/home");
     } catch (error) {
@@ -138,9 +235,32 @@ const Login = () => {
       setLoading(false);
     }
   };
-  
 
   // ---- EXISTING RETURN (UI / LAYOUT) ----
+
+  const handlePasswordChange = (e) => {
+    const password = e.target.value;
+    setResetPassword(password);
+    calculatePasswordStrength(password);
+  };
+
+  const handleConfirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
+    if (resetPassword !== e.target.value) {
+      setPasswordsMatch(false);
+    } else {
+      setPasswordsMatch(true);
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
+  };
+
   return (
     <div className="center-wrapper">
       <section className="px-5 lg:px-0">
@@ -215,12 +335,218 @@ const Login = () => {
                     </div>
                   </Form.Item>
                   <Form.Item>
-                    <Row justify="center">
-                      <Typography.Text type="secondary">
-                        Don't have an account?{" "}
-                        <Link to="/register">Register</Link>
-                      </Typography.Text>
+                    <Row justify="end">
+                      <Link onClick={() => setShow(true)}>Forgot Password</Link>
+                      {/* Modal for Forgot Password */}
+                      <div
+                        className={`modal fade ${show ? "show" : ""}`}
+                        style={{ display: show ? "block" : "none" }}
+                        id="exampleModal"
+                        tabIndex="-1"
+                        aria-labelledby="exampleModalLabel"
+                        aria-hidden={!show}
+                      >
+                        <div className="modal-dialog">
+                          <div className="modal-content">
+                            <div className="modal-header">
+                              <h1
+                                className="modal-title fs-5"
+                                id="exampleModalLabel"
+                              >
+                                Forgot Password
+                              </h1>
+                              <button
+                                type="button"
+                                className="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                                onClick={() => setShow(false)}
+                              ></button>
+                            </div>
+                            <div className="modal-body">
+                              <div className="mb-3">
+                                <form>
+                                  <label
+                                    htmlFor="exampleInputPhone1"
+                                    className="form-label"
+                                  >
+                                    Phone No.
+                                  </label>
+                                  <div className="row">
+                                    <div className="col-8">
+                                      <Input
+                                        type="tel"
+                                        id="exampleInputPhone1"
+                                        value={phone}
+                                        onChange={(e) =>
+                                          setPhone(e.target.value)
+                                        }
+                                        size="large"
+                                        disabled={isSentOtp}
+                                        placeholder="Enter your phone number"
+                                      />
+                                    </div>
+                                    <div className="col-4">
+                                      <Button
+                                        type="primary"
+                                        size="large"
+                                        disabled={isSentOtp}
+                                        onClick={sentOtp}
+                                      >
+                                        Get OTP
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </form>
+                                {isSentOtp && (
+                                  <form>
+                                    <div className="mb-3">
+                                      <label
+                                        htmlFor="otpInput"
+                                        className="form-label"
+                                      >
+                                        OTP
+                                      </label>
+                                      <Input
+                                        type="number"
+                                        id="otpInput"
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value)}
+                                        size="large"
+                                        placeholder="Enter OTP"
+                                      />
+                                    </div>
+                                    <div className="mb-3">
+                                      <label
+                                        htmlFor="newPasswordInput"
+                                        className="form-label"
+                                      >
+                                        New Password
+                                      </label>
+                                      <Input.Password
+                                        id="newPasswordInput"
+                                        value={resetPassword}
+                                        onChange={handlePasswordChange}
+                                        size="large"
+                                        placeholder="Enter your new password"
+                                        type={
+                                          isPasswordVisible
+                                            ? "text"
+                                            : "password"
+                                        }
+                                        suffix={
+                                          isPasswordVisible ? (
+                                            <EyeOutlined
+                                              onClick={togglePasswordVisibility}
+                                            />
+                                          ) : (
+                                            <EyeInvisibleOutlined
+                                              onClick={togglePasswordVisibility}
+                                            />
+                                          )
+                                        }
+                                      />
+                                      <div className="mt-2">
+                                        <div
+                                          className="progress"
+                                          style={{
+                                            height: "10px",
+                                            backgroundColor: "#e0e0e0",
+                                          }}
+                                        >
+                                          <div
+                                            className="progress-bar"
+                                            role="progressbar"
+                                            style={{
+                                              width: `${passwordStrength}%`,
+                                              backgroundColor:
+                                                passwordStrength < 40
+                                                  ? "red"
+                                                  : passwordStrength < 70
+                                                  ? "yellow"
+                                                  : "green",
+                                            }}
+                                            aria-valuenow={passwordStrength}
+                                            aria-valuemin="0"
+                                            aria-valuemax="100"
+                                          ></div>
+                                        </div>
+                                        <small>
+                                          Password strength:{" "}
+                                          {passwordStrength < 40
+                                            ? "Weak"
+                                            : passwordStrength < 70
+                                            ? "Medium"
+                                            : "Strong"}
+                                        </small>
+                                      </div>
+                                    </div>
+                                    <Form.Item
+                                      label="Confirm Password"
+                                      validateStatus={
+                                        !passwordsMatch ? "error" : ""
+                                      }
+                                      help={
+                                        !passwordsMatch
+                                          ? "Passwords do not match!"
+                                          : ""
+                                      }
+                                    >
+                                      <Input.Password
+                                        id="confirmPasswordInput"
+                                        value={confirmPassword}
+                                        onChange={handleConfirmPasswordChange}
+                                        size="large"
+                                        placeholder="Confirm your password"
+                                        type={
+                                          isConfirmPasswordVisible
+                                            ? "text"
+                                            : "password"
+                                        }
+                                        suffix={
+                                          isConfirmPasswordVisible ? (
+                                            <EyeOutlined
+                                              onClick={
+                                                toggleConfirmPasswordVisibility
+                                              }
+                                            />
+                                          ) : (
+                                            <EyeInvisibleOutlined
+                                              onClick={
+                                                toggleConfirmPasswordVisibility
+                                              }
+                                            />
+                                          )
+                                        }
+                                      />
+                                    </Form.Item>
+                                    <Button
+                                      type="primary"
+                                      size="large"
+                                      onClick={handleReset}
+                                      disabled={
+                                        passwordStrength < 70 || !passwordsMatch
+                                      }
+                                      block
+                                    >
+                                      Reset Password
+                                    </Button>
+                                  </form>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </Row>
+                    <Form.Item>
+                      <Row justify="center">
+                        <Typography.Text type="secondary">
+                          Don't have an account?{" "}
+                          <Link to="/register">Register</Link>
+                        </Typography.Text>
+                      </Row>
+                    </Form.Item>
                   </Form.Item>
                 </Form>
               </Flex>

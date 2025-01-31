@@ -17,6 +17,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
     role: "patient",
@@ -151,6 +152,22 @@ const Register = () => {
                       placeholder="Enter your email!"
                       name="email"
                       value={formData.email}
+                      onChange={handleChange}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label="Phone"
+                    name="phone"
+                    rules={[
+                      { required: true, message: "Please input your phone!" },
+                      { type: "phone", message: "Please input a valid phone!" },
+                    ]}
+                  >
+                    <Input
+                      size="large"
+                      placeholder="Enter your Phone!"
+                      name="phone"
+                      value={formData.phone}
                       onChange={handleChange}
                     />
                   </Form.Item>
