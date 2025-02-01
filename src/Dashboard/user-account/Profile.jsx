@@ -7,7 +7,7 @@ import uploadImageToCloudinary from "../../utils/uploadCloudinary";
 
 const { Option } = Select;
 
-// User profile component
+
 const Profile = ({ user }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
