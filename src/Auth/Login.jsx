@@ -41,7 +41,7 @@ const Login = () => {
   const [remainingAttempts, setRemainingAttempts] = useState(null);
   const [lockTime, setLockTime] = useState(null);
   const [timer, setTimer] = useState(null);
-  // We'll store interval reference so we can clear it
+
   const timerRef = useRef(null);
 
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -111,21 +111,19 @@ const Login = () => {
 
     try {
       const response = await axios.post(`${BASE_URL}/auth/forgot_password`, {
-        phone: phone.trim(), // Ensure no extra spaces in phone number
+        phone: phone.trim(), 
       });
 
       if (response.status === 200) {
         toast.success(response.data.message);
-        setIsSentOtp(true); // Disable button after OTP is sent
+        setIsSentOtp(true); 
       } else {
         toast.error(response.data.message || "Failed to send OTP.");
       }
     } catch (error) {
       if (error.response && error.response.data) {
-        // Handle known errors
         toast.error(error.response.data.message || "Failed to send OTP.");
       } else {
-        // Handle unexpected errors
         console.log(error);
         toast.error("An unexpected error occurred. Please try again.");
       }
