@@ -35,7 +35,7 @@ const useFetchData = (url) => {
     };
 
     fetchData();
-  }, [url, token]); // Include token in the dependency array if it can change
+  }, [url, token]);
 
   return {
     data,
