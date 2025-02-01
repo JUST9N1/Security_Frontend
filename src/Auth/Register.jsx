@@ -7,6 +7,7 @@ import signupImg from "../assets/images/signup.gif";
 import { BASE_URL } from "../config";
 import uploadImageToCloudinary from "../utils/uploadCloudinary";
 import ReCAPTCHA from "react-google-recaptcha";
+import "./Register.css";
 
 const Register = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -104,7 +105,8 @@ const Register = () => {
   };
 
   return (
-    <div className="center-wrapper">
+    <div className="register-page">
+          <main className="center-wrapper">
       <section className="px-5 lg:px-0">
         <div className="w-full max-w-[1170px] mx-auto rounded-lg shadow md:p-10 justify-center">
           <Card className="form-container">
@@ -349,6 +351,8 @@ const Register = () => {
           </Card>
         </div>
       </section>
+    </main>
+
     </div>
   );
 };
