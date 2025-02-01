@@ -33,7 +33,7 @@ const AdminPanel = () => {
 
   const approveWorker = async (id) => {
     try {
-      console.log(`Approving worker with ID: ${id}`);
+      // console.log(`Approving worker with ID: ${id}`);
       const response = await axios.patch(
         `${BASE_URL}/workers/approve-worker/${id}`,
         {},
@@ -41,7 +41,7 @@ const AdminPanel = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Approve response:", response);
+      // console.log("Approve response:", response);
       message.success("Worker approved successfully");
       fetchWorkers();
     } catch (error) {
@@ -65,7 +65,7 @@ const AdminPanel = () => {
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      console.log("Updating worker with values:", values);
+      // console.log("Updating worker with values:", values);
       const response = await axios.put(
         `${BASE_URL}/workers/${selectedWorker._id}`,
         values,
