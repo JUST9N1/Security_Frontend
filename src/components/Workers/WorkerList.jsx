@@ -7,7 +7,7 @@ import WorkerCard from "./WorkerCard";
 const WorkerList = () => {
   const { data: workers, loading, error } = useFetchData(`${BASE_URL}/workers`);
 
-  // Ensure workers is an array
+
   const workersArray = Array.isArray(workers) ? workers : [];
 
   return (
