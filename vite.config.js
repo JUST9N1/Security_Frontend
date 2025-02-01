@@ -7,6 +7,15 @@ import { defineConfig } from "vite";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  build: {
+    sourcemap: false,  // Ensure source maps are fully disabled
+    minify: "terser",  // Minify the output for security
+    rollupOptions: {
+      output: {
+        manualChunks: undefined, // Prevent chunk splitting
+      },
+    },
+  },
   test: {
     globals: true,
     environment: "jsdom",
