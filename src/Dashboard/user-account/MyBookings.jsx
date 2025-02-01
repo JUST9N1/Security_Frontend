@@ -4,7 +4,7 @@ import WorkerCard from "../../components/Workers/WorkerCard";
 import { BASE_URL } from "../../config";
 import useFetchData from "../../hooks/useFetchData";
 
-// MyBookings component
+
 const MyBookings = () => {
   const {
     data: appointments,
