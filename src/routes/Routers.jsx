@@ -15,6 +15,7 @@ import AdminAccount from "../Dashboard/admin-account/AdminAccount.jsx";
 
 const Routers = () => {
 
+  // ProtectedRoute is a custom component that checks if the user is logged in and has the required role to access the page
   return (
     <Routes>
       <Route path="/register" element={<Register />} />
