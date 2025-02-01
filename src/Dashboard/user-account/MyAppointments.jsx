@@ -14,7 +14,7 @@ const MyAppointment = () => {
         const response = await axios.get(`${BASE_URL}/bookings/my-appointments`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        console.log('API Response:', response);
+        // console.log('API Response:', response);
         if (response.data.success && Array.isArray(response.data.data)) {
           setAppointments(response.data.data);
         } else {

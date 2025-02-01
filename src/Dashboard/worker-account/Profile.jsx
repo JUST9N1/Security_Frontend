@@ -47,7 +47,7 @@ const Profile = ({ workerData }) => {
     if (!file) return; // Ensure a file is selected
     try {
       const data = await uploadImageToCloudinary(file);
-      console.log("Uploaded image URL:", data?.url);
+      // console.log("Uploaded image URL:", data?.url);
       if (data?.url) {
         setFormData({ ...formData, photo: data.url });
       } else {

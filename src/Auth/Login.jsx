@@ -124,7 +124,7 @@ const Login = () => {
       if (error.response && error.response.data) {
         toast.error(error.response.data.message || "Failed to send OTP.");
       } else {
-        console.log(error);
+        // console.log(error);
         toast.error("An unexpected error occurred. Please try again.");
       }
     }
