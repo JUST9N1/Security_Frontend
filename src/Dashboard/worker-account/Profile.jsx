@@ -44,7 +44,7 @@ const Profile = ({ workerData }) => {
 
   const handleFileInputChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) return; // Ensure a file is selected
+    if (!file) return; 
     try {
       const data = await uploadImageToCloudinary(file);
       // console.log("Uploaded image URL:", data?.url);
