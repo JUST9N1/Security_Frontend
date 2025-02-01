@@ -1,6 +1,5 @@
 import { createContext, useEffect, useReducer } from "react";
 
-// Safely parse JSON from localStorage
 const parseJSON = (value) => {
   try {
     return JSON.parse(value);
