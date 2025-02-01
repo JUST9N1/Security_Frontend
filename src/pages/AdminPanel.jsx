@@ -73,7 +73,7 @@ const AdminPanel = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Update response:", response);
+      // console.log("Update response:", response);
       message.success("Worker updated successfully");
       fetchWorkers();
       setIsModalVisible(false);

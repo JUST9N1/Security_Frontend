@@ -8,7 +8,7 @@ import FeedbackForm from "./FeedbackForm";
 const Feedback = ({ reviews, totalRating }) => {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
 
-  console.log("Reviews:", reviews); // Debug: Log reviews to check if they are passed correctly
+  console.log("Reviews:", reviews); 
 
   return (
     <div>
@@ -17,7 +17,7 @@ const Feedback = ({ reviews, totalRating }) => {
           All reviews ({totalRating})
         </h4>
 
-        {reviews && reviews.length > 0 ? ( // Check if reviews exist
+        {reviews && reviews.length > 0 ? ( 
           reviews.map((review, index) => (
             <div key={index} className="flex justify-between gap-10 mb-[30px]">
               <div className="flex gap-3">
@@ -51,7 +51,7 @@ const Feedback = ({ reviews, totalRating }) => {
             </div>
           ))
         ) : (
-          <p>No reviews yet.</p> // Display a message if no reviews are present
+          <p>No reviews yet.</p> 
         )}
       </div>
 
