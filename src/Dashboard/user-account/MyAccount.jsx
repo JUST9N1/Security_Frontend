@@ -7,7 +7,7 @@ import { AuthContext } from "../../contexts/AuthContext";
 import useGetProfile from "../../hooks/useFetchData";
 import MyBookings from "./MyBookings";
 import Profile from "./Profile";
-import MyAppointments from "./MyAppointments"; // Ensure this import
+import MyAppointments from "./MyAppointments"; 
 
 const MyAccount = () => {
   const { dispatch } = useContext(AuthContext);

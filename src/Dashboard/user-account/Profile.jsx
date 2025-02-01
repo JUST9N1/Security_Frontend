@@ -2,7 +2,7 @@ import { Alert, Button, Form, Input, Select, Spin } from "antd";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { BASE_URL } from "../../config"; // assuming token is stored in local storage
+import { BASE_URL } from "../../config"; 
 import uploadImageToCloudinary from "../../utils/uploadCloudinary";
 
 const { Option } = Select;
