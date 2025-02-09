@@ -271,7 +271,7 @@ const Register = () => {
                         >
                           <option value="patient">Patient</option>
                           <option value="worker">Worker</option>
-                          <option value="admin">Admin</option>
+                          {/* <option value="admin">Admin</option> */}
                         </select>
                       </label>
                       <label className="text-textColor font-bold text-[16px] leading-7">
